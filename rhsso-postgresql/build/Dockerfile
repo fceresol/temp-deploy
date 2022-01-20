@@ -4,7 +4,7 @@ MAINTAINER <Filippo Ceresoli> <filippo.ceresoli@redhat.com>
 
 ENV DEFAULT_LAUNCH $JBOSS_HOME/bin/openshift-launch.sh
 
-COPY extensions/postconfigure.sh    $JBOSS_HOME/extensions/
+COPY extensions/*.sh    $JBOSS_HOME/extensions/
 COPY extensions/*.cli         $JBOSS_HOME/extensions/
 
 
