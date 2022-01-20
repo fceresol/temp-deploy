@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "------------- START UPDATING CONFIGURATION ---------------"
+cp -p /opt/eap/standalone/configuration/standalone-openshift.xml /opt/eap/extensions/standalone-ocp.bak
 echo "creating datasources:"
 $JBOSS_HOME/bin/jboss-cli.sh --file=/opt/eap/extensions/datasources.cli
 echo "configuring TX object store:"
