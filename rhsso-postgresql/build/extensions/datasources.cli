@@ -1,13 +1,13 @@
 ## admin cli commands to edit the configuration
 embed-server --std-out=echo  --server-config=standalone-openshift.xml
-batch
+#batch
 ## currently deployed module is ojdbc8 - you can replace the driver jar with your own and update the script accordingly
 
 ## remove the old - embedded DS
 echo removing old datasource....
 #/subsystem=datasources/xa-data-source=KeycloakDS:remove()
 
-run-batch
+#run-batch
 
 batch
 echo creating the new datasource....
