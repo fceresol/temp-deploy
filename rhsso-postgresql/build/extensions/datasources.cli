@@ -5,16 +5,16 @@ batch
 
 ## remove the old - embedded DS
 echo removing old datasource....
-/subsystem=datasources/xa-data-source=KeycloakDS:remove()
+/subsystem=datasources/xa-datasource=KeycloakDS:remove()
 
 
 echo creating the new datasource....
-/subsystem=datasources/xa-data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+/subsystem=datasources/xa-datasource=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="validate-on-match", value="true")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
 
-/subsystem=datasources/xa-data-source=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
+/subsystem=datasources/xa-datasource=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
 
 
 
