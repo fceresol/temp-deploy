@@ -5,7 +5,7 @@ batch
 
 ## remove the old - embedded DS
 echo removing old datasource....
-/subsystem=datasources/data-source=KeycloakDS:remove()
+/subsystem=datasources/xa-data-source=KeycloakDS:remove()
 
 
 echo creating the new datasource....
