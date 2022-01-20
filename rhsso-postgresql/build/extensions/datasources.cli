@@ -11,16 +11,16 @@ run-batch
 
 batch
 echo creating the new datasource....
-/subsystem=datasources/xa-data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
-/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+/subsystem=datasources/xa-datasource=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="validate-on-match", value="true")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
+/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
 
 /subsystem=datasources/xa-datasource=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
 
 
 
-/subsystem=datasources/data-source=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
+/subsystem=datasources/datasource=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
 
 ### end of datasource creation
 run-batch
