@@ -1,12 +1,13 @@
 #!/bin/bash
 
 echo "------------- START UPDATING CONFIGURATION ---------------"
+
 cp -p /opt/eap/standalone/configuration/standalone-openshift.xml /opt/eap/extensions/standalone-ocp.bak
 echo "creating datasources:"
 $JBOSS_HOME/bin/jboss-cli.sh --file=/opt/eap/extensions/datasources.cli
 echo "configuring TX object store:"
 
-prefix="os${JBOSS_NODE_NAME//-/}"
+local prefix="os${HOSTNAME//-/}"
 
 echo "
 embed-server --std-out=echo  --server-config=standalone-openshift.xml
@@ -28,3 +29,4 @@ echo "configuring x-site-replica"
 $JBOSS_HOME/bin/jboss-cli.sh --file=/opt/eap/extensions/x-site-replica.cli
 
 echo "------------- ENDED UPDATING CONFIGURATION ---------------"
+cp -p /opt/eap/standalone/configuration/standalone-openshift.xml /opt/eap/extensions/standalone-ocp.new
