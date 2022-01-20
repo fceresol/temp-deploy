@@ -1,29 +1,51 @@
 ## admin cli commands to edit the configuration
 embed-server --std-out=echo  --server-config=standalone-openshift.xml
-#batch
+
 ## currently deployed module is ojdbc8 - you can replace the driver jar with your own and update the script accordingly
 
 ## remove the old - embedded DS
 echo removing old datasource....
-#/subsystem=datasources/xa-data-source=KeycloakDS:remove()
+if (outcome == success) of /subsystem=datasources/xa-data-source=KeycloakDS:read-resource
+  echo "XAds already exists ... removing"
+  /subsystem=datasources/xa-data-source=KeycloakDS:remove()
+else
+  echo "XAds does not exist ... "
+end-if
 
-#run-batch
 
-batch
+if (outcome == success) of /subsystem=datasources/data-source=KeycloakDS:read-resource
+  echo "DS already exists ... removing"
+  /subsystem=datasources/data-source=KeycloakDS:remove()
+else
+  echo "DS does not exist ... "
+end-if
+
+
+
+
 echo creating the new datasource....
-/subsystem=datasources/xa-datasource=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
-/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="validate-on-match", value="true")
-/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
-/subsystem=datasources/xa-datasource=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+echo /subsystem=datasources/xa-data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
 
-/subsystem=datasources/xa-datasource=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
+/subsystem=datasources/xa-data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
+echo /subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
+
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
+
+echo /subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
+echo /subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+
+echo /subsystem=datasources/xa-data-source=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
+/subsystem=datasources/xa-data-source=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
 
 
 
-/subsystem=datasources/datasource=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
+echo /subsystem=datasources/data-source=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
+/subsystem=datasources/data-source=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
 
 ### end of datasource creation
-run-batch
+
 
 
 echo RH-SSO is configured for External Postrgesql DB
