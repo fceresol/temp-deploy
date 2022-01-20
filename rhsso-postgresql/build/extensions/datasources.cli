@@ -2,85 +2,27 @@
 embed-server --std-out=echo  --server-config=standalone-openshift.xml
 batch
 ## currently deployed module is ojdbc8 - you can replace the driver jar with your own and update the script accordingly
-echo adding driver....
-module add --name=com.oracle.jdbc --resources=/opt/eap/extensions/ojdbc8.jar --dependencies=javax.api,javax.resource.api,javax.transaction.api,javax.xml.bind.api
 
-/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle.jdbc,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
 ## remove the old - embedded DS
 echo removing old datasource....
 /subsystem=datasources/data-source=KeycloakDS:remove()
-## create the new one using the Oracle drivers
+
+
 echo creating the new datasource....
-/subsystem=datasources/data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,connection-url="$\{env.ORACLE_DATABASE_URL\}",driver-name=oracle,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}")
-/subsystem=datasources/data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
-/subsystem=datasources/data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker")
-/subsystem=datasources/data-source=KeycloakDS:write-attribute(name="stale-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker")
-/subsystem=datasources/data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter")
+/subsystem=datasources/xa-data-source=KeycloakDS:add(jndi-name=java:jboss/datasources/KeycloakDS,enabled=true,use-java-context=true,driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}",statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}")
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="validate-on-match", value="true")
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="valid-connection-checker-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker")
+/subsystem=datasources/xa-data-source=KeycloakDS:write-attribute(name="exception-sorter-class-name", value="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter")
+
+/subsystem=datasources/xa-data-source=KeycloakDS/xa-datasource-properties=URL:add(value="\$\{env.DB_URL\}")
+
+
+
+/subsystem=datasources/data-source=KeycloakDSObjectStore:add(jndi-name=java:jboss/datasources/KeycloakDSObjectStore,enabled=true,use-java-context=true,connection-url="$\{env.DB_URL\}",driver-name=postgresql,user-name="\$\{env.DB_USERNAME\}",password="\$\{env.DB_PASSWORD\}", statistics-enabled="\$\{wildfly.datasources.statistics-enabled:\$\{wildfly.statistics-enabled:false\}\}",jta=false)
 
 ### end of datasource creation
 run-batch
-batch
-### configuring caches
-echo configuring caches....
-### creating remote socket binding
-echo creating remote socket binding....
-/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding="remote-cache":add(host="$\{env.REMOTE_CACHE_HOST:localhost\}", port="$\{env.REMOTE_CACHE_PORT:11222\}")
-/subsystem=jgroups/stack=tcp/transport=TCP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
-/subsystem=jgroups/stack=udp/transport=UDP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
-### configuring caches
-echo configuring caches....
-/subsystem=infinispan/cache-container=keycloak:write-attribute(name=module,value="org.keycloak.keycloak-model-infinispan")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=sessions/store=remote:add(cache="sessions",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineSessions/store=remote:add(cache="offlineSessions",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=clientSessions/store=remote:add(cache="clientSessions",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineClientSessions/store=remote:add(cache="offlineClientSessions",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=loginFailures/store=remote:add(cache="loginFailures",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=actionTokens/store=remote:add(cache="actionTokens",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-
-/subsystem=infinispan/cache-container=keycloak/replicated-cache=work/store=remote:add(cache="work",remote-servers=[remote-cache], passivation="false", fetch-state="false", purge="false", preload="false", shared="true")
-run-batch
-
-batch
-echo configuring caches for XSite Replication....
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=sessions/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=sessions/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=sessions/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineSessions/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineSessions/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineSessions/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=clientSessions/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=clientSessions/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=clientSessions/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineClientSessions/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineClientSessions/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=offlineClientSessions/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=loginFailures/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=loginFailures/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=loginFailures/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=actionTokens/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=actionTokens/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/distributed-cache=actionTokens/store=remote/property=protocolVersion:add(value="2.6")
-
-/subsystem=infinispan/cache-container=keycloak/replicated-cache=work/store=remote/property=rawValues:add(value=true)
-/subsystem=infinispan/cache-container=keycloak/replicated-cache=work/store=remote/property=marshaller:add(value="org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory")
-/subsystem=infinispan/cache-container=keycloak/replicated-cache=work/store=remote/property=protocolVersion:add(value="2.6")
-run-batch
-### enable logging
-batch
-echo enabling infinispan logging with level ....
-/subsystem=logging/logger=org.keycloak.cluster.infinispan:add(level="$\{env.INFINISPAN_LOG_LEVEL\}")
-/subsystem=logging/logger=org.keycloak.connections.infinispan:add(level="$\{env.INFINISPAN_LOG_LEVEL\}")
-/subsystem=logging/logger=org.keycloak.models.cache.infinispan:add(level="$\{env.INFINISPAN_LOG_LEVEL\}")
-/subsystem=logging/logger=org.keycloak.models.sessions.infinispan:add(level="$\{env.INFINISPAN_LOG_LEVEL\}")
 
 
-run-batch
-
-echo RH-SSO is configured for XSite replication and External Oracle DB
+echo RH-SSO is configured for External Postrgesql DB
 quit
