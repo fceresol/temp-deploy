@@ -7,7 +7,7 @@ echo "creating datasources:"
 $JBOSS_HOME/bin/jboss-cli.sh --file=/opt/eap/extensions/datasources.cli
 echo "configuring TX object store:"
 
-local prefix="os${HOSTNAME//-/}"
+prefix="os${HOSTNAME//-/}"
 
 echo "
 embed-server --std-out=echo  --server-config=standalone-openshift.xml
