@@ -10,6 +10,7 @@ COPY extensions/*.cli         $JBOSS_HOME/extensions/
 
 USER root
 RUN chmod 774 $JBOSS_HOME/extensions/*.sh
+RUN chmod 777 $JBOSS_HOME/extensions
 USER jboss
 
 CMD $DEFAULT_LAUNCH
