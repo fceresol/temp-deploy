@@ -7,8 +7,8 @@ echo configuring caches....
 ### creating remote socket binding
 echo creating remote socket binding....
 /socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding="remote-cache":add(host="$\{env.REMOTE_CACHE_HOST:localhost\}", port="$\{env.REMOTE_CACHE_PORT:11222\}")
-## non serve più? /subsystem=jgroups/stack=tcp/transport=TCP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
-## non serve più? /subsystem=jgroups/stack=udp/transport=UDP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
+/subsystem=jgroups/stack=tcp/transport=TCP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
+/subsystem=jgroups/stack=udp/transport=UDP:write-attribute(name=site, value="$\{env.LOCAL_DATAGRID_SITE:site\}")
 ### configuring caches
 echo configuring caches....
 /subsystem=infinispan/cache-container=keycloak:write-attribute(name=module,value="org.keycloak.keycloak-model-infinispan")
